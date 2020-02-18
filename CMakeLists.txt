@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 project(gpg)
 set(CMAKE_BUILD_TYPE Release)
 
+# Installation
+execute_process (
+    COMMAND bash -c "cd ../src/gpg ; ./install.sh"
+)
+
 # Eigen library
 include_directories(${EIGEN3_INCLUDE_DIR})
 
@@ -15,10 +20,10 @@ add_definitions(${PCL_DEFINITIONS})
 set(CMAKE_CXX_FLAGS "-O3 -fopenmp -fPIC -Wno-deprecated -Wenum-compare")
 # set(CMAKE_CXX_FLAGS "-O3 -fopenmp -march=native -mfpmath=sse -funroll-loops -fPIC -Wno-deprecated -Wenum-compare") # no improvement
 # set(CMAKE_CXX_FLAGS "-frename-registers -Ofast -march=native -fopenmp -fPIC -Wno-deprecated -Wenum-compare") # no improvement
- 
+
 # Add the headers from the <include> directory
 include_directories(include)
- 
+
 # Generate the shared library from the sources
 add_library(${PROJECT_NAME}_grasp_candidates_generator SHARED src/${PROJECT_NAME}/candidates_generator.cpp)
 
@@ -38,67 +43,67 @@ add_library(${PROJECT_NAME}_point_list src/${PROJECT_NAME}/point_list.cpp)
 
 # This executable is for testing the shared library
 add_executable(${PROJECT_NAME}_generate_candidates src/generate_candidates.cpp)
-target_link_libraries(${PROJECT_NAME}_generate_candidates 
-                      ${PROJECT_NAME}_config_file 
+target_link_libraries(${PROJECT_NAME}_generate_candidates
+                      ${PROJECT_NAME}_config_file
                       ${PROJECT_NAME}_grasp_candidates_generator)
 
 # Linking for libraries
-target_link_libraries(${PROJECT_NAME}_antipodal 
+target_link_libraries(${PROJECT_NAME}_antipodal
                       ${PROJECT_NAME}_point_list)
 
-target_link_libraries(${PROJECT_NAME}_cloud_camera 
-                      ${PROJECT_NAME}_eigen_utils 
+target_link_libraries(${PROJECT_NAME}_cloud_camera
+                      ${PROJECT_NAME}_eigen_utils
                       ${PCL_LIBRARIES})
 
-target_link_libraries(${PROJECT_NAME}_eigen_utils 
+target_link_libraries(${PROJECT_NAME}_eigen_utils
                       ${EIGEN_LIBRARIES})
 
-target_link_libraries(${PROJECT_NAME}_frame_estimator 
-                      ${PROJECT_NAME}_cloud_camera 
+target_link_libraries(${PROJECT_NAME}_frame_estimator
+                      ${PROJECT_NAME}_cloud_camera
                       ${PROJECT_NAME}_local_frame)
 
-target_link_libraries(${PROJECT_NAME}_grasp 
+target_link_libraries(${PROJECT_NAME}_grasp
                       ${PROJECT_NAME}_finger_hand)
 
-target_link_libraries(${PROJECT_NAME}_grasp_set 
-                      ${PROJECT_NAME}_antipodal 
-                      ${PROJECT_NAME}_grasp 
-                      ${PROJECT_NAME}_local_frame 
+target_link_libraries(${PROJECT_NAME}_grasp_set
+                      ${PROJECT_NAME}_antipodal
+                      ${PROJECT_NAME}_grasp
+                      ${PROJECT_NAME}_local_frame
                       ${PROJECT_NAME}_point_list)
 
-target_link_libraries(${PROJECT_NAME}_hand_search 
-                      ${PROJECT_NAME}_antipodal 
-                      ${PROJECT_NAME}_cloud_camera  
-                      ${PROJECT_NAME}_frame_estimator 
-                      ${PROJECT_NAME}_grasp_set 
+target_link_libraries(${PROJECT_NAME}_hand_search
+                      ${PROJECT_NAME}_antipodal
+                      ${PROJECT_NAME}_cloud_camera
+                      ${PROJECT_NAME}_frame_estimator
+                      ${PROJECT_NAME}_grasp_set
                       ${PROJECT_NAME}_plot)
 
-target_link_libraries(${PROJECT_NAME}_local_frame 
+target_link_libraries(${PROJECT_NAME}_local_frame
                       ${PCL_LIBRARIES})
 
-target_link_libraries(${PROJECT_NAME}_plot 
-                      ${PROJECT_NAME}_cloud_camera 
-                      ${PROJECT_NAME}_grasp_set 
+target_link_libraries(${PROJECT_NAME}_plot
+                      ${PROJECT_NAME}_cloud_camera
+                      ${PROJECT_NAME}_grasp_set
                       ${PROJECT_NAME}_local_frame)
 
-target_link_libraries(${PROJECT_NAME}_grasp_candidates_generator 
+target_link_libraries(${PROJECT_NAME}_grasp_candidates_generator
                       ${PROJECT_NAME}_hand_search)
-                      
-target_link_libraries(${PROJECT_NAME}_point_list 
+
+target_link_libraries(${PROJECT_NAME}_point_list
                       ${PROJECT_NAME}_eigen_utils)
 
 
 # Rename executable.
-set_target_properties(${PROJECT_NAME}_generate_candidates 
-                      PROPERTIES OUTPUT_NAME generate_candidates 
+set_target_properties(${PROJECT_NAME}_generate_candidates
+                      PROPERTIES OUTPUT_NAME generate_candidates
                       PREFIX "")
 
-set_target_properties(${PROJECT_NAME}_grasp_candidates_generator 
+set_target_properties(${PROJECT_NAME}_grasp_candidates_generator
                       PROPERTIES OUTPUT_NAME grasp_candidates_generator)
 
 # Set the location for library installation (/usr/lib in this case is not really necessary)
 # Use "sudo make install" to apply
-install(TARGETS ${PROJECT_NAME}_grasp_candidates_generator 
+install(TARGETS ${PROJECT_NAME}_grasp_candidates_generator
         DESTINATION lib)
 
 install(DIRECTORY include/gpg DESTINATION include)
